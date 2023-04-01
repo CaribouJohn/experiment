@@ -1,4 +1,5 @@
 #include <memory>
+#include <vector>
 
 namespace proisam
 {
@@ -71,6 +72,39 @@ namespace proisam
         int16_t nReservedDWord{}; /* Currently Unused */
     };
 
+     class CLIENT
+    {
+    };
+
+
+    class PAGELOCK
+    {
+    public:
+        CLIENT nOwner{};         /* Owner of the update lock */
+        int32_t nLockIndex{};     /* Index of the Page Lock structure */
+        int16_t nFlags{};         /* Lock status */
+    };
+
+    class PAGEBUFF
+    {
+    public:
+        int32_t nFileId{};    /* File ID */
+        int32_t nFLink{};    /* Offset to next page buffer in chain */
+        int32_t nBLink{};    /* Offset to previous page buffer in chain */
+        PAGELOCK PageLock{};  /* Page Lock structure */
+        int16_t nFlags{};     /* Page flags */
+        int16_t nPageSize{};  /* Page Size */
+        uint16_t nPageNo{};    /* Page Number */
+        DISKPAGE DiskPage{};  /* Disk portion of the page */
+
+        PAGEBUFF(int16_t size) : nPageSize(size) {}
+        ~PAGEBUFF() {}
+        //nSeekPos = (long)(nPageNo * pPageBuff->nPageSize);
+        //nErr = fileRead(pCatalog->nFileRef, nSeekPos, (char*)&(pPageBuff->DiskPage), pPageBuff->nPageSize);
+        std::istream& operator<<(std::istream& in);
+
+    }; 
+
     class CATALOG
     {
     public:
@@ -90,6 +124,8 @@ namespace proisam
         int16_t nFreeHead{};  /* Head of free page list */
         int16_t nHighLev{};   /* Top level index */
 
+        std::vector<PAGEBUFF> pages{};
+
         CATALOG() {
             if (bCatDefer) {
                 nFlags |= CAT_DEFER;
@@ -103,30 +139,6 @@ namespace proisam
 
 
     class RAB;
-    class CLIENT
-    {
-    };
-
-    class PAGELOCK
-    {
-    public:
-        CLIENT nOwner{};         /* Owner of the update lock */
-        int32_t nLockIndex{};     /* Index of the Page Lock structure */
-        int16_t nFlags{};         /* Lock status */
-    };
-
-
-    class PAGEBUFF
-    {
-        int32_t nFileId{};    /* File ID */
-        int32_t nFLink{};    /* Offset to next page buffer in chain */
-        int32_t nBLink{};    /* Offset to previous page buffer in chain */
-        PAGELOCK PageLock{};  /* Page Lock structure */
-        int16_t nFlags{};     /* Page flags */
-        int16_t nPageSize{};  /* Page Size */
-        uint16_t nPageNo{};    /* Page Number */
-        DISKPAGE DiskPage{};  /* Disk portion of the page */
-    }; 
     
     class IOCB
     {

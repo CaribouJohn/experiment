@@ -55,7 +55,7 @@ namespace proisam
 		if (in.good()) {
 			/*Read Binary data using streambuffer iterators.*/
 			DISKPAGE pagedata;
-			DISKCAT data;
+			DISKCAT data; //intermediate structure
 			// TODO: current DiskPage has 1 char of data... why?
 			// header is discarded.
 			in.read((char*)&pagedata, sizeof(DISKPAGE) - 1);
@@ -69,6 +69,29 @@ namespace proisam
 			nPageSz = data.nPageSize;
 			nFreeHead = data.nFree;
 			nHighLev = data.nHighLevel;
+
+			//load pages
+			PAGEBUFF buffer(nPageSz);
+			buffer << in;
+			return in;
+		}
+		else {
+			throw proisam::ProisamException("file not good");
+		}
+		return in;
+	}
+
+
+	/*
+	* PAGEBUFF 
+	*/
+	std::istream& PAGEBUFF::operator<<(std::istream& in) {
+		if (in.good()) {
+			/*Read Binary data using streambuffer iterators.*/
+			DISKPAGE pagedata;
+			// header is discarded.
+			in.read((char*)&pagedata, sizeof(DISKPAGE) - 1);
+			in.read((char*)this, nPageSize);
 			return in;
 		}
 		else {
